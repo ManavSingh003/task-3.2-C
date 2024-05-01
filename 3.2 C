@@ -1,0 +1,48 @@
+python
+#!/usr/bin/env python3
+
+# Importing Required Dependencies
+import rospy 
+from geometry_msgs.msg import Twist
+from std_msgs.msg import Float64
+from turtlesim.msg import Pose
+import time 
+import math
+
+# Class to Calculate Distance Travelled by Turtle
+class TurtleDistanceCalculator:
+    def __init__(self):
+        # Initializing the ROS node
+        rospy.init_node('turtle_distance_calculator', anonymous=True)
+
+        # Subscribing to the turtle pose topic
+        rospy.Subscriber("/turtle1/pose", Pose, self.callback)
+
+        # Publisher to publish the calculated distance
+        self.distance_publisher = rospy.Publisher('/turtle_distance', Float64, queue_size=10)
+
+        # Logging initialization
+        rospy.loginfo("Node Initialized!")
+
+        # Keeping the script running until node is stopped
+        rospy.spin()
+
+    # Callback function for processing turtle pose messages
+    def callback(self, msg):
+        rospy.loginfo("Turtle Position: %s %s", msg.x, msg.y)
+
+        # Calculating the distance travelled by the turtle and publishing it
+        pos_x = msg.x
+        pos_y = msg.y 
+
+        distance = math.sqrt(pos_x ** 2 + pos_y ** 2)
+        rospy.loginfo("Total Distance Travelled: %s", distance)
+        self.distance_publisher.publish(distance)
+
+if __name__ == '__main__': 
+    try: 
+        # Creating an instance of the TurtleDistanceCalculator class
+        turtle_distance_calculator = TurtleDistanceCalculator()
+    except rospy.ROSInterruptException: 
+        pass
+
